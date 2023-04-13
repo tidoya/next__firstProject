@@ -1,13 +1,32 @@
-import { Inter } from 'next/font/google';
 import Home from '@/components/screens/home/Home';
-import Layout from '@/components/layout/layout';
+import { IProductData } from '@/interfaces/product.inteface';
+import { ProductService } from '@/services/product.service';
+import { GetServerSideProps, GetStaticProps, NextPage } from 'next';
+import React from 'react';
 
-const inter = Inter({ subsets: ['latin'] });
+const HomePage: NextPage<IProductData> = ({ products }) => {
+  return <Home products={products} />;
+};
+//ssg
+export const getStaticProps: GetStaticProps<IProductData> = async () => {
+  const data = await ProductService.getAllProduct();
+  return {
+    props: {
+      products: data.products,
+      limit: data.limit,
+      skip: data.skip,
+      total: data.total,
+    },
+    revalidate: 60,
+  };
+};
 
-export default function HomePage() {
-  return (
-    <Layout title="Home page" description="hi">
-      <Home />
-    </Layout>
-  );
-}
+//ssr
+// export const getServerSideProps: GetServerSideProps<IProductData> = async () => {
+//   const products = await ProductService.getAllProduct();
+
+//   return {
+//     props: { products },
+//   };
+// };
+export default HomePage;
